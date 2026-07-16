@@ -1,0 +1,48 @@
+# ---- Python ----
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---- Node / JavaScript ----
+node_modules/
+dist/
+build/
+.next/
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---- Java ----
+target/
+*.class
+*.jar
+*.war
+.gradle/
+
+# ---- Go ----
+bin/
+*.exe
+*.test
+*.out
+
+# ---- C# / .NET ----
+[Bb]in/
+[Oo]bj/
+*.user
+
+# ---- Environment / secrets ----
+.env
+.env.local
+*.local
+
+# ---- Editors / OS ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

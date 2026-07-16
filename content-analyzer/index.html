@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Content Analyzer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: #f5f5f5; color: #333; }
+        h1 { text-align: center; margin-bottom: 30px; color: #1a1a2e; }
+        textarea { width: 100%; height: 150px; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; resize: vertical; font-family: inherit; }
+        textarea:focus { outline: none; border-color: #4a90d9; }
+        button { display: block; width: 100%; padding: 15px; margin-top: 15px; background: #4a90d9; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        button:hover { background: #357abd; }
+        #results { margin-top: 30px; display: none; }
+        .metric { background: white; padding: 20px; border-radius: 8px; margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .metric-label { font-size: 14px; color: #666; margin-bottom: 5px; }
+        .metric-value { font-size: 24px; font-weight: bold; }
+        .positive { color: #27ae60; } .negative { color: #e74c3c; } .neutral { color: #f39c12; }
+        #error-message { color: #e74c3c; margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+    <h1>Smart Content Analyzer</h1>
+    <textarea id="text-input" placeholder="Paste your text here (email, LinkedIn post, resume bullet, cover letter...)"></textarea>
+    <button id="analyze-btn" onclick="analyzeText()">Analyze Text</button>
+    <p id="error-message"></p>
+    <div id="results">
+        <div class="metric"><div class="metric-label">Sentiment</div><div class="metric-value" id="sentiment-value"></div></div>
+        <div class="metric"><div class="metric-label">Subjectivity</div><div class="metric-value" id="subjectivity-value"></div></div>
+        <div class="metric"><div class="metric-label">Reading Ease</div><div class="metric-value" id="reading-ease-value"></div></div>
+        <div class="metric"><div class="metric-label">Grade Level</div><div class="metric-value" id="grade-level-value"></div></div>
+        <div class="metric"><div class="metric-label">Word Count</div><div class="metric-value" id="word-count-value"></div></div>
+        <div class="metric"><div class="metric-label">Difficult Words</div><div class="metric-value" id="difficult-words-value"></div></div>
+    </div>
+    <script>
+        function analyzeText() {
+            var text = document.getElementById('text-input').value.trim();
+            var errorMessage = document.getElementById('error-message');
+            var resultsDiv = document.getElementById('results');
+
+            errorMessage.style.display = "none";
+            resultsDiv.style.display = "none";
+
+
+           if(!text.trim())
+           {
+                errorMessage.textContent = "Please enter some text to analyze.";
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            fetch("http://localhost:5000/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: text })
+            })
+            .then(function(response) {if (!response.ok) { throw new Error("Network response was not ok"); } return response.json(); })
+            .then(function(data) {
+                 var polarity = data.sentiment_polarity;
+                 var sentimentEl = document.getElementById("sentiment-value");
+                 if (polarity > 0.1) { sentimentEl.textContent = "Positive (" + polarity + ")"; sentimentEl.className = "metric-value positive"; }
+                 else if (polarity < -0.1) { sentimentEl.textContent = "Negative (" + polarity + ")"; sentimentEl.className = "metric-value negative"; }
+                 else { sentimentEl.textContent = "Neutral (" + polarity + ")"; sentimentEl.className = "metric-value neutral"; }
+                 document.getElementById("subjectivity-value").textContent = data.sentiment_subjectivity;
+                 document.getElementById("reading-ease-value").textContent = data.flesch_reading_ease;
+                 document.getElementById("grade-level-value").textContent = "Grade " + data.grade_level;
+                 document.getElementById("word-count-value").textContent = data.word_count;
+                 document.getElementById("difficult-words-value").textContent = data.difficult_words;
+                  results.style.display = "block";
+                })
+            .catch(function(error) {
+                errorMessage.textContent = "Error analyzing text: " + error.message;
+                errorMessage.style.display = "block";
+            });
+        }
+    </script>
+</body>
+</html> 
